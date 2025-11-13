@@ -173,7 +173,13 @@ export class RegistroMaestrosComponent implements OnInit {
     if(Object.keys(this.errors).length > 0){
       return false;
     }
-    //Validar la contraseña
+
+      this.maestro.fecha_nacimiento = this.limpiarFecha(this.maestro.fecha_nacimiento);
+      console.log("FECHA ENVIADA:", this.maestro.fecha_nacimiento);
+
+
+      //Validar la contraseña
+
     if(this.maestro.password == this.maestro.confirmar_password){
       this.maestrosService.registrarMaestro(this.maestro).subscribe(
         (response) => {
@@ -216,6 +222,23 @@ public soloLetras(event: KeyboardEvent) {
   ) {
     event.preventDefault();
   }
+}
+
+private limpiarFecha(fecha: any): string {
+  if (!fecha) return "";
+
+  // Si viene como objeto Date
+  if (fecha instanceof Date) {
+    return fecha.toISOString().split("T")[0];
+  }
+
+  // Si viene como string con T00:00:00Z
+  if (typeof fecha === "string" && fecha.includes("T")) {
+    return fecha.split("T")[0];
+  }
+
+  // Si ya viene formateada correctamente (YYYY-MM-DD)
+  return fecha;
 }
 }
 

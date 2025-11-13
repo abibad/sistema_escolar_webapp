@@ -1,0 +1,143 @@
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
+import { Router } from '@angular/router';
+import { FacadeService } from 'src/app/services/facade.service';
+import { AlumnosService } from 'src/app/services/alumnos.service';
+import { ChangeDetectorRef } from '@angular/core';
+
+@Component({
+  selector: 'app-alumnos-screen',
+  templateUrl: './alumnos-screen.component.html',
+  styleUrls: ['./alumnos-screen.component.scss']
+})
+export class AlumnosScreenComponent implements OnInit {
+
+  public name_user: string = "";
+  public rol: string = "";
+  public token: string = "";
+  public lista_alumnos: any[] = [];
+
+  //Para la tabla
+  displayedColumns: string[] = ['id_alumno', 'nombre', 'email', 'fecha_nacimiento', 'telefono', 'rfc', 'curp', 'edad', 'ocupacion', 'editar', 'eliminar'];
+  dataSource = new MatTableDataSource<DatosUsuario>(this.lista_alumnos as DatosUsuario[]);
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
+
+  constructor(
+    public facadeService: FacadeService,
+    public alumnosService: AlumnosService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) { }
+
+  ngOnInit(): void {
+    this.name_user = this.facadeService.getUserCompleteName();
+    this.rol = this.facadeService.getUserGroup();
+    //Validar que haya inicio de sesión
+    //Obtengo el token del login
+    this.token = this.facadeService.getSessionToken();
+    console.log("Token: ", this.token);
+    if(this.token == ""){
+      this.router.navigate(["/"]);
+    }
+    //Obtener maestros
+    this.obtenerAlumnos();
+  }
+
+  // Consumimos el servicio para obtener los alumnos
+  //Obtener alumnos
+ public obtenerAlumnos() {
+  this.alumnosService.obtenerListaAlumnos().subscribe(
+    (response) => {
+      this.lista_alumnos = response;
+      console.log("Lista users: ", this.lista_alumnos);
+
+      if (this.lista_alumnos.length > 0) {
+        this.lista_alumnos.forEach(usuario => {
+          usuario.id_alumno = usuario.matricula;
+          usuario.first_name = usuario.user.first_name;
+          usuario.last_name = usuario.user.last_name;
+          usuario.email = usuario.user.email;
+        });
+
+        this.dataSource = new MatTableDataSource<DatosUsuario>(this.lista_alumnos as DatosUsuario[]);
+        this.cdr.detectChanges();
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+
+        this.dataSource.filterPredicate = (data, filter: string) => {
+          const texto = (data.first_name + ' ' + data.last_name + ' ' + data.id_alumno).toLowerCase();
+          return texto.includes(filter.trim().toLowerCase());
+        };
+
+        this.dataSource.sortingDataAccessor = (item, property) => {
+          switch (property) {
+            case 'nombre':
+              return item.first_name.toLowerCase();
+            case 'apellido':
+              return item.last_name.toLowerCase();
+            case 'id_alumno':
+              return item.id_alumno;
+            default:
+              return item[property];
+          }
+        };
+
+
+      }
+    },
+    (error) => {
+      console.error("Error al obtener la lista de alumnos: ", error);
+      alert("No se pudo obtener la lista de alumnos");
+    }
+  );
+}
+
+ //Filtro por nombre o apellido
+aplicarFiltro(event: Event) {
+  const valor = (event.target as HTMLInputElement).value;
+  this.filtroTexto = valor.trim().toLowerCase();
+  this.dataSource.filter = this.filtroTexto;
+}
+
+public limpiarFiltro(): void {
+  this.filtroTexto = '';
+  this.dataSource.filter = '';
+}
+
+
+filtroTexto: string = '';
+
+
+  public goEditar(idUser: number) {
+    this.router.navigate(["registro-usuarios/alumnos/" + idUser]);
+  }
+
+  public delete(idUser: number) {
+
+  }
+
+}
+
+//Esto va fuera de la llave que cierra la clase
+export interface DatosUsuario {
+  id: number,
+  id_alumno: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  fecha_nacimiento: string,
+  telefono: string,
+  rfc: string,
+  curp:string;
+  edad:number,
+  ocupacion: string,
+}

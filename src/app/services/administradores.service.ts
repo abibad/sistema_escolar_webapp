@@ -172,4 +172,18 @@ export class AdministradoresService {
     }
     return this.http.post<any>(`${environment.url_api}/admin/`,data, { headers });
   }
+
+    public obtenerListaAdmins(): Observable<any>{
+    const token = this.facadeService.getSessionToken(); //OBTENIENDO el token, guardalo si existe
+    let headers: HttpHeaders; //VARIABLE DONDE GUARDARAS LOS ENCABEZADOS DE LA PETICION
+    if (token) {
+      headers = new HttpHeaders({ 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token });
+    } else {
+      headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+      console.log("No se encontró el token del usuario");
+
+    }
+    return this.http.get<any>(`${environment.url_api}/lista-admins/`, { headers });
+  }//OBTIENE LOS DATOS DEL SERVIDOS , LE PASAS LA URL DEL ENDPOINT, LOS HEADERS Y REGRESAS UN OBSERVABLE
+//LA PETICION SE EJECUTA EN EL COMPONENTE CON EL SUBSCRIBE
 }
