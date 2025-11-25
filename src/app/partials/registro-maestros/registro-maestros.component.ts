@@ -44,11 +44,35 @@ export class RegistroMaestrosComponent implements OnInit {
     private router: Router
   ) { }
 
-  ngOnInit(): void {
-    this.maestro = this.maestrosService.esquemaMaestro();
-    this.maestro.rol = this.rol;
-    this.maestro.materias_json = []; // Initialize the materias_json array
-  }
+    ngOnInit(): void {
+      //El primer if valida si existe un parámetro en la URL
+      if(this.activatedRoute.snapshot.params['id'] != undefined){
+        this.editar = true;
+        //Asignamos a nuestra variable global el valor del ID que viene por la URL
+        this.idUser = this.activatedRoute.snapshot.params['id'];
+        console.log("ID User: ", this.idUser);
+        //Al iniciar la vista asignamos los datos del user
+        this.maestro = this.datos_user || {};
+        // Asegurar que exista el array materias_json al editar
+        this.maestro.materias_json = Array.isArray(this.maestro.materias_json) ? this.maestro.materias_json : [];
+        // Marcar materias seleccionadas si estamos editando
+        if (this.editar && this.maestro.materias_json) {
+          this.materias = this.materias.map(m => ({
+            ...m,
+            selected: this.maestro.materias_json.includes(m.nombre)
+          }));
+        }
+      }else{
+        // Va a registrar un nuevo administrador
+        this.maestro = this.maestrosService.esquemaMaestro();
+        this.maestro.rol = this.rol;
+        this.token = this.facadeService.getSessionToken();
+        // Inicializar materias_json para evitar push sobre undefined
+        this.maestro.materias_json = Array.isArray(this.maestro.materias_json) ? this.maestro.materias_json : [];
+      }
+      //Imprimir datos en consola
+      console.log("Maestro: ", this.maestro);
+    }
 
   public showPassword() {
     if(this.inputType_1 == 'password'){
@@ -91,9 +115,30 @@ export class RegistroMaestrosComponent implements OnInit {
     this.location.back();
   }
 
-  public actualizar(){
-    // TODO: Implementar actualización
+    public actualizar(){
+    // Validación de los datos
+    this.errors = {};
+    this.errors = this.maestrosService.validarMaestro(this.maestro, this.editar);
+    if(Object.keys(this.errors).length > 0){
+      return false;
+    }
+
+    // Ejecutar el servicio de actualización
+    this.maestrosService.actualizarMaestro(this.maestro).subscribe(
+      (response) => {
+        // Redirigir o mostrar mensaje de éxito
+        alert("Maestroo actualizado exitosamente");
+        console.log("Maestro actualizado: ", response);
+        this.router.navigate(["maestros"]);
+      },
+      (error) => {
+        // Manejar errores de la API
+        alert("Error al actualizar maestro");
+        console.error("Error al actualizar maestro: ", error);
+      }
+    );
   }
+
 
   public materias:any[] = [
     {value: '1', nombre: 'Aplicaciones Web'},
@@ -110,19 +155,20 @@ export class RegistroMaestrosComponent implements OnInit {
 
 
   onMateriaChange(materia: any) {
-      console.log("🔍 Materia cambiada:", materia);
-      console.log("🔍 Selected:", materia.selected);
+      // Asegurar array
+      if (!Array.isArray(this.maestro.materias_json)) {
+        this.maestro.materias_json = [];
+      }
 
       if (materia.selected) {
-        // Agregar el nombre de la materia al array
-        this.maestro.materias_json.push(materia.nombre);
-        console.log("✅ Materia agregada:", materia.nombre);
+        // Evitar duplicados
+        if (!this.maestro.materias_json.includes(materia.nombre)) {
+          this.maestro.materias_json.push(materia.nombre);
+        }
       } else {
-        // Remover la materia del array
         const index = this.maestro.materias_json.indexOf(materia.nombre);
         if (index > -1) {
           this.maestro.materias_json.splice(index, 1);
-          console.log("❌ Materia removida:", materia.nombre);
         }
       }
 
@@ -139,18 +185,19 @@ export class RegistroMaestrosComponent implements OnInit {
 
   // Funciones para los checkbox
   public checkboxChange(event: any) {
-    console.log("Evento: ", event);
-    if (event.checked) {
-      this.maestro.materias_json.push(event.source.value);
-    } else {
-      console.log(event.source.value);
-      this.maestro.materias_json.forEach((materia: string, i: number) => {
-        if (materia == event.source.value) {
-          this.maestro.materias_json.splice(i, 1);
-        }
-      });
+    if (!Array.isArray(this.maestro.materias_json)) {
+      this.maestro.materias_json = [];
     }
-    console.log("Array materias: ", this.maestro);
+
+    if (event.checked) {
+      if (!this.maestro.materias_json.includes(event.source.value)) {
+        this.maestro.materias_json.push(event.source.value);
+      }
+    } else {
+      const idx = this.maestro.materias_json.indexOf(event.source.value);
+      if (idx > -1) this.maestro.materias_json.splice(idx, 1);
+    }
+    console.log("Array materias: ", this.maestro.materias_json);
   }
 
   public revisarSeleccion(nombre: string): boolean {

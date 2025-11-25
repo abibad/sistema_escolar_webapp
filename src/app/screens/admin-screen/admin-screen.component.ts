@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { EliminarUserModalComponent } from 'src/app/modals/eliminar-user-modal/eliminar-user-modal.component';
 import { AdministradoresService } from 'src/app/services/administradores.service';
 import { FacadeService } from 'src/app/services/facade.service';
 
@@ -17,6 +19,7 @@ export class AdminScreenComponent implements OnInit {
     public facadeService: FacadeService,
     private administradoresService: AdministradoresService,
     private router: Router,
+    public dialog: MatDialog
   ) { }
 
   ngOnInit(): void {
@@ -43,8 +46,30 @@ export class AdminScreenComponent implements OnInit {
     this.router.navigate(["registro-usuarios/administrador/"+idUser]);//manera mas comun de pasar datos
   }
 
-  public delete(idUser: number){
+  public delete(idUser: number) {
+  const userId = Number(this.facadeService.getUserId());
+  const userGroup = this.facadeService.getUserGroup();
 
+  // Solo administradores pueden eliminar
+  if (userGroup === 'administrador') {
+    const dialogRef = this.dialog.open(EliminarUserModalComponent,{
+      data: {id: idUser, rol: 'administrador'}, // ← Cambiar 'alumno' por 'administrador'
+      height: '288px',
+      width: '328px',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if(result.isDelete){
+        console.log("Administrador eliminado");
+        alert("Administrador eliminado correctamente.");
+        window.location.reload();
+      }else{
+        alert("Administrador no se ha podido eliminar.");
+        console.log("No se eliminó el administrador");
+      }
+    });
+  }else{
+    alert("No tienes permisos para eliminar este administrador.");
   }
-
+}
 }

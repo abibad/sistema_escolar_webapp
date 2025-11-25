@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-
+import { MatSortModule } from '@angular/material/sort';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -26,9 +26,7 @@ import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatSelectModule} from '@angular/material/select';
 import {MatTableModule} from '@angular/material/table';
-import { MatSortModule } from '@angular/material/sort';
-
-
+import {MatDialogModule} from '@angular/material/dialog';
 // Paginación
 import {MatPaginatorIntl, MatPaginatorModule} from '@angular/material/paginator';
 //Para el paginator en español
@@ -48,6 +46,7 @@ import { AlumnosScreenComponent } from './screens/alumnos-screen/alumnos-screen.
 import { MaestrosScreenComponent } from './screens/maestros-screen/maestros-screen.component';
 import { NavbarUserComponent } from './partials/navbar-user/navbar-user.component';
 import { SidebarComponent } from './partials/sidebar/sidebar.component';
+import { EliminarUserModalComponent } from './modals/eliminar-user-modal/eliminar-user-modal.component';
 
 @NgModule({
   declarations: [
@@ -64,7 +63,8 @@ import { SidebarComponent } from './partials/sidebar/sidebar.component';
     AlumnosScreenComponent,
     MaestrosScreenComponent,
     NavbarUserComponent,
-    SidebarComponent
+    SidebarComponent,
+    EliminarUserModalComponent
   ],
   imports: [
     BrowserModule,
@@ -85,6 +85,7 @@ import { SidebarComponent } from './partials/sidebar/sidebar.component';
     MatSidenavModule,
     MatTableModule,
     MatPaginatorModule,
+    MatDialogModule,
     MatSortModule
   ],
   providers: [

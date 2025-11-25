@@ -36,9 +36,23 @@ export class RegistroAlumnosComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.alumno = this.alumnosService.esquemaAlumno();
-    // Rol del usuario
-    this.alumno.rol = this.rol;
+
+    //El primer if valida si existe un parámetro en la URL
+    if(this.activatedRoute.snapshot.params['id'] != undefined){
+      this.editar = true;
+      //Asignamos a nuestra variable global el valor del ID que viene por la URL
+      this.idUser = this.activatedRoute.snapshot.params['id'];
+      console.log("ID User: ", this.idUser);
+      //Al iniciar la vista asignamos los datos del user
+      this.alumno = this.datos_user;
+    }else{
+      // Va a registrar un nuevo administrador
+      this.alumno = this.alumnosService.esquemaAlumno();
+      this.alumno.rol = this.rol;
+      this.token = this.facadeService.getSessionToken();
+    }
+    //Imprimir datos en consola
+    console.log("Alumno: ", this.alumno);
   }
 
   //Funciones para password
@@ -70,8 +84,29 @@ export class RegistroAlumnosComponent implements OnInit {
 
 
   public actualizar(){
-    // TODO: Implementar actualización
+    // Validación de los datos
+    this.errors = {};
+    this.errors = this.alumnosService.validarAlumno(this.alumno, this.editar);
+    if(Object.keys(this.errors).length > 0){
+      return false;
+    }
+
+    // Ejecutar el servicio de actualización
+    this.alumnosService.actualizarAlumno(this.alumno).subscribe(
+      (response) => {
+        // Redirigir o mostrar mensaje de éxito
+        alert("Alumno actualizado exitosamente");
+        console.log("Alumno actualizado: ", response);
+        this.router.navigate(["alumnos"]);
+      },
+      (error) => {
+        // Manejar errores de la API
+        alert("Error al actualizar alumno");
+        console.error("Error al actualizar alumno: ", error);
+      }
+    );
   }
+
 
   // Función para los campos solo de datos alfabeticos
   public soloLetras(event: KeyboardEvent) {
