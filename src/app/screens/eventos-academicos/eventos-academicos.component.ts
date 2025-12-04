@@ -314,7 +314,7 @@ export class EventosAcademicosComponent implements OnInit {
   }
 
   /**
-   * Convierte horas de formato 12 horas (ej: "1:00 PM") a formato 24 horas (ej: "13:00")
+   * Convierte horas de formato 12 horas (ej: "1:00 PM") a formato 24 horas
    */
   convertirHoraA24Horas(hora: string): string {
     if (!hora) return '';

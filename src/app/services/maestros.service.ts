@@ -15,7 +15,7 @@ const httpOptions = {
 })
 export class MaestrosService {
 
-     private apiUrl = 'http://localhost:8000/api';
+     private apiUrl = 'https://abibad.pythonanywhere.com';
 
   private httpOptions = {
     headers: new HttpHeaders({

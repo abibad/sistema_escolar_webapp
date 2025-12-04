@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  url_api: 'http://tu-servidor-produccion.com/api'
+  url_api: 'https://abibad.pythonanywhere. com'
 };
