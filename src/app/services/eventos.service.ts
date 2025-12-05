@@ -222,8 +222,12 @@ export class EventosService {
           }
         }
 
-        // Use the underlying user id when available (backend expects User id)
-        const idUsuario = (m.user && m.user.id) ? m.user.id : m.id;
+        // Robustly derive the User ID expected by backend
+        const idUsuario =
+          (m?.user?.id)
+          ?? m?.user_id
+          ?? m?.pk
+          ?? m?.id;
         return {
           id: idUsuario,
           nombre: nombre
@@ -246,8 +250,12 @@ export class EventosService {
           }
         }
 
-        // Use the underlying user id when available
-        const idUsuario = (a.user && a.user.id) ? a.user.id : a.id;
+        // Robustly derive the User ID expected by backend
+        const idUsuario =
+          (a?.user?.id)
+          ?? a?.user_id
+          ?? a?.pk
+          ?? a?.id;
         return {
           id: idUsuario,
           nombre: nombre

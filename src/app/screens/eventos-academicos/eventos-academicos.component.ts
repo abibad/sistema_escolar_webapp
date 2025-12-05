@@ -368,6 +368,10 @@ export class EventosAcademicosComponent implements OnInit {
     const eventoParaEnviar = { ...this.evento };
     eventoParaEnviar.hora_inicio = this.convertirHoraA24Horas(eventoParaEnviar.hora_inicio);
     eventoParaEnviar.hora_fin = this.convertirHoraA24Horas(eventoParaEnviar.hora_fin);
+    // Asegurar responsable_id numérico
+    if (eventoParaEnviar.responsable_id) {
+      eventoParaEnviar.responsable_id = parseInt(String(eventoParaEnviar.responsable_id), 10);
+    }
 
     console.log('Responsable ID antes de enviar:', eventoParaEnviar.responsable_id, 'Tipo:', typeof eventoParaEnviar.responsable_id);
     console.log('Evento para enviar:', eventoParaEnviar);
