@@ -328,9 +328,12 @@ export class EventosService {
       datosFormato.hora_fin = this.convertirHoraA24(datosFormato.hora_fin);
     }
 
-    // Convertir responsable_id a número
+    // Convertir responsable_id a número y duplicar en 'responsable' si el backend lo requiere
     if (datosFormato.responsable_id) {
-      datosFormato.responsable_id = parseInt(datosFormato.responsable_id, 10);
+      const respId = parseInt(datosFormato.responsable_id, 10);
+      datosFormato.responsable_id = respId;
+      // Enviar también 'responsable' por compatibilidad
+      (datosFormato as any).responsable = respId;
     }
 
     console.log('URL:', `${this.apiUrl}/eventos/`);
